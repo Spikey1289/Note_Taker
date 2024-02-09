@@ -24,8 +24,7 @@ app.post('/api/notes', (req, res) => {
         title: req.body.title,
         text: req.body.text
     };
-    console.log(newNote);
-
+    
     //retrieve data from json file into array
     fs.readFile('./db/db.json', 'utf-8', (err, data) => {
         if (err) {
@@ -41,19 +40,55 @@ app.post('/api/notes', (req, res) => {
             fs.writeFile(
                 './db/db.json', 
                 JSON.stringify(parsedNote, null, 4),
-                (writeErr) => writeErr ? console.error(writeErr) : console.info('updated notes')
+                (writeErr) => {
+                    if(writeErr) {
+                        console.error(writeErr) 
+                    } else {
+                        console.info('updated notes');
+
+                        const response = {
+                            body: parsedNote
+                        };
+
+                        res.json(response);
+                    }
+                }
             );
         }
     })
-
-    //send response
-    const response = {
-        status: 'success',
-        body: newNote,
-    };
-
-    res.json(response);
 });
+
+// app.delete('api/notes/:id', (req, res) => {
+//     const noteID = req.params.id;
+//     console.log(noteID);
+//     fs.readFile('./db/db.json', 'utf-8', (err, data) => {
+//         if (err) {
+//             console.error(err);
+//         } else {
+//             //parsed notes array
+//             const parsedNote = JSON.parse(data).filter((note) => note.id !== noteID)
+//             console.log(parsedNote);
+//             //save as json file
+//             fs.writeFile(
+//                 './db/db.json',
+//                 JSON.stringify(parsedNote, null, 4),
+//                 (writeErr) => {
+//                     if (writeErr) {
+//                         console.error(writeErr)
+//                     } else {
+//                         console.info('updated notes');
+
+//                         const response = {
+//                             body: parsedNote
+//                         };
+
+//                         res.json(response);
+//                     }
+//                 }
+//             );
+//         }
+//     })
+// });
 
 //retrieve all existing notes from server
 app.get('/api/notes', (req, res) => res.json(notes));
