@@ -1,13 +1,16 @@
 [
     {
+        "id": "1",
         "title":"Test Title",
         "text":"Test text"
     },
     {
+        "id": "2",
         "title": "Nerd",
         "text": "NEEEEEEEEEEERD"
     },
     {
+        "id": "3",
         "title": "I had a good breakfast",
         "text": "it was yummy"
     }
