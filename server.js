@@ -1,8 +1,9 @@
 const express = require('express');
 const path = require('path');
 const notes = require('./db/db.json');
-const fs = require('fs');
+const fs = require('fs').promises;
 const {v4: uuidv4} = require('uuid');
+
 
 const PORT = process.env.PORT || 3001;
 
@@ -16,79 +17,62 @@ app.get('/notes', (req, res) => {
     res.sendFile(path.join(__dirname, '/public/notes.html'));
 });
 
+
 //POST route for new notes
 app.post('/api/notes', (req, res) => {
-    //generate new id
-    const newNote = {
-        id: uuidv4(),
-        title: req.body.title,
-        text: req.body.text
-    };
-    
+
+    // //generate new id
+    // let newNote = {
+    //     id: uuidv4(),
+    //     title: req.body.title,
+    //     text: req.body.text
+    // };
+
+
     //retrieve data from json file into array
-    fs.readFile('./db/db.json', 'utf-8', (err, data) => {
-        if (err) {
-            console.error(err);
-        } else {
-            //parsed notes array
-            const parsedNote = JSON.parse(data);
+    fs.readFile('./db/db.json')
+        .then((data) => JSON.parse(data))
+        .then((array) => {
+            //generate new id
+            let newNote = {
+                id: uuidv4(),
+                title: req.body.title,
+                text: req.body.text
+            };
+            array.push(newNote);
+            return array;
+        })
+        .then((array) => {
+            let stringedNote = JSON.stringify(array, null, 4);
+            fs.writeFile('./db/db.json', stringedNote);
+            console.info('updated notes');
 
-            //push onto array
-            parsedNote.push(newNote);
-
-            //save as json file
-            fs.writeFile(
-                './db/db.json', 
-                JSON.stringify(parsedNote, null, 4),
-                (writeErr) => {
-                    if(writeErr) {
-                        console.error(writeErr) 
-                    } else {
-                        console.info('updated notes');
-
-                        const response = {
-                            body: parsedNote
-                        };
-
-                        res.json(response);
-                    }
-                }
-            );
-        }
-    })
+            const response = {
+                body: stringedNote
+            };
+            res.send("response");
+        })
+    .catch((err) => console.log(err));
 });
 
-// app.delete('api/notes/:id', (req, res) => {
-//     const noteID = req.params.id;
-//     console.log(noteID);
-//     fs.readFile('./db/db.json', 'utf-8', (err, data) => {
-//         if (err) {
-//             console.error(err);
-//         } else {
-//             //parsed notes array
-//             const parsedNote = JSON.parse(data).filter((note) => note.id !== noteID)
-//             console.log(parsedNote);
-//             //save as json file
-//             fs.writeFile(
-//                 './db/db.json',
-//                 JSON.stringify(parsedNote, null, 4),
-//                 (writeErr) => {
-//                     if (writeErr) {
-//                         console.error(writeErr)
-//                     } else {
-//                         console.info('updated notes');
+app.delete('/api/notes/:id', (req, res) => {
+    fs.readFile('./db/db.json')
+        .then((data) => {
+            let noteID = req.params.id;
+            let excArray = JSON.parse(data).filter((note) => note.id !== noteID);
+            return excArray;
+        })
+        .then((excArray) => {
+            let stringedData = JSON.stringify(excArray, null, 4);
+            fs.writeFile('./db/db.json', stringedData);
 
-//                         const response = {
-//                             body: parsedNote
-//                         };
-
-//                         res.json(response);
-//                     }
-//                 }
-//             );
-//         }
-//     })
-// });
+            const response = {
+                body: stringedData
+            };
+            res.send("response");
+        })
+        .catch((err) => console.log(err));
+});
 
 //retrieve all existing notes from server
 app.get('/api/notes', (req, res) => res.json(notes));
