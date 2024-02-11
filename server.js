@@ -21,14 +21,6 @@ app.get('/notes', (req, res) => {
 //POST route for new notes
 app.post('/api/notes', (req, res) => {
 
-    // //generate new id
-    // let newNote = {
-    //     id: uuidv4(),
-    //     title: req.body.title,
-    //     text: req.body.text
-    // };
-
-
     //retrieve data from json file into array
     fs.readFile('./db/db.json')
         .then((data) => JSON.parse(data))
