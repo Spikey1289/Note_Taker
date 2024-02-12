@@ -42,7 +42,7 @@ app.post('/api/notes', (req, res) => {
             const response = {
                 body: stringedNote
             };
-            res.send("response");
+            res.send(response);
         })
     .catch((err) => console.log(err));
 });
@@ -61,13 +61,18 @@ app.delete('/api/notes/:id', (req, res) => {
             const response = {
                 body: stringedData
             };
-            res.send("response");
+            res.send(response);
         })
         .catch((err) => console.log(err));
 });
 
 //retrieve all existing notes from server
-app.get('/api/notes', (req, res) => res.json(notes));
+app.get('/api/notes', (req, res) => {
+    fs.readFile('./db/db.json')
+        .then((data) => JSON.parse(data))
+        .then((notes) => res.json(notes))
+        .catch((err) => console.log(err))
+});
 
 //express midware to serve static pages
 app.use(express.static('public'));
